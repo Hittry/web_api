@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  firstName String?
+  lastName  String?
+  isAdmin   Boolean @default(false)
+  tokens    Token[]
+}
+
+model Token {
+  id         Int       @id @default(autoincrement())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  type       TokenType
+  emailToken String?   @unique
+  valid      Boolean   @default(true)
+  expiration DateTime
+  userId     Int
+  user       User      @relation(fields: [userId], references: [id])
+}
+
+model DianonPerson {
+  id                  Int                   @id @default(autoincrement())
+  email               String?               @unique
+  firstName           String
+  lastName            String
+  social              Json?
+  distinctiveFeatures DistinctiveFeatures[]
+  organization        Organization[]
+  personalInfo        PersonalInfo[]
+}
+
+model Organization {
+  id        Int          @id @default(autoincrement())
+  personID  Int
+  name      String
+  rank      String?
+  date      DateTime?
+  firstName String?
+  lastName  String?
+  person    DianonPerson @relation(fields: [personID], references: [id])
+}
+
+model DistinctiveFeatures {
+  id       Int          @id @default(autoincrement())
+  personId Int
+  tato     String?
+  colour   String?
+  sex      String
+  injury   String?
+  person   DianonPerson @relation(fields: [personId], references: [id])
+}
+
+model PersonalInfo {
+  id        Int          @id @default(autoincrement())
+  personId  Int
+  passport  String?      @unique
+  marital   String?
+  children  String?
+  adress    String?
+  register  String?
+  telephone String
+  person    DianonPerson @relation(fields: [personId], references: [id])
+}
+
+enum TokenType {
+  EMAIL
+  API
+}
