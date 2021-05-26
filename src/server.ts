@@ -11,7 +11,10 @@ import authPlugin from './plugins/auth'
 import hapiAuthJWT from 'hapi-auth-jwt2'
 import * as HapiSwagger from 'hapi-swagger'
 import Inert from '@hapi/inert'
+import dotenv from 'dotenv'
 import Vision from '@hapi/vision'
+
+dotenv.config()
 
 const server: Hapi.Server = Hapi.server({
     port: process.env.PORT || 3000,
@@ -48,29 +51,3 @@ process.on('unhandledRejection', err => {
   console.log(err)
   process.exit(1)
 })
-
-  //export async function start(): Promise<Hapi.Server> {
-    //await server.register([
-      //{
-        //plugin: HapiSwagger,
-        //options: swaggerOptions,
-      //},
-    //])
-    //await server.register([hapiAuthJWT, authPlugin, prismaPlugin, emailPlugin, statusPlugin, usersPlugin, dianonPlugin, 
-      //orgPlugin, featuresPlugin, infoPlugin, Inert, Vision])
-
-//    await server.start()
-  //  console.log(`Server running on ${server.info.uri}`)
-    //return server
-  //}
-  
-  //process.on('unhandledRejection', (err) => {
-    //console.log(err)
-    //process.exit(1)
-  //})
-  
-  
-  //start()
-    //.catch((err) => {
-      //console.log(err)
-    //})

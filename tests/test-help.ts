@@ -3,7 +3,6 @@ import { TokenType } from '@prisma/client'
 import { add } from 'date-fns'
 import { AuthCredentials } from '@hapi/hapi'
 
-// Helper function to create a test user and return the credentials object the same way that the auth plugin does
 export const createUserCredentials = async (
   prisma: PrismaClient,
   isAdmin: boolean,
@@ -15,7 +14,7 @@ export const createUserCredentials = async (
       tokens: {
         create: {
           expiration: add(new Date(), { days: 7 }),
-          type: TokenType.API,
+          type_token: TokenType.API,
         },
       },
     },

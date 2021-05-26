@@ -4,7 +4,12 @@ import Joi from 'joi'
 import { API_AUTH_STATEGY } from './auth'
 import { isAdmin } from '../auth-help'
 
-// plugin to instantiate Prisma Client
+declare module '@hapi/hapi' {
+    interface FeatCredentials {
+        userId: number
+    }
+}
+
 const featuresPlugin = {
   name: 'app/features',
   dependencies: ['prisma'],
@@ -26,7 +31,6 @@ const featuresPlugin = {
               validate: {
                   payload: createFeaturesValidator,
                   failAction: (request, h, err) => {
-                    // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                     throw err
                   },
               }
@@ -56,7 +60,6 @@ const featuresPlugin = {
                     personId: Joi.string().pattern(/^[0-9]+$/),
                 }),
                 failAction: (request, h, err) => {
-                    // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                     throw err
                   },
               },
@@ -80,7 +83,6 @@ const featuresPlugin = {
                     personId: Joi.string().pattern(/^[0-9]+$/),
                 }),
                 failAction: (request, h, err) => {
-                  // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                   throw err
                 },
               },
@@ -105,7 +107,6 @@ const featuresPlugin = {
                 }),
                 payload: updateFeaturesValidator,
                 failAction: (request, h, err) => {
-                  // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                   throw err
                 },
               },

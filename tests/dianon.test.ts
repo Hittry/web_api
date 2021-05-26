@@ -1,18 +1,21 @@
 import { createServer } from '../src/server'
-import Hapi, { AuthCredentials } from '@hapi/hapi'
+import Hapi, { AuthCredentials, DianonCredentials } from '@hapi/hapi'
 import {describe, expect, test, beforeAll, afterAll} from '@jest/globals'
 import { API_AUTH_STATEGY } from '../src/plugins/auth'
 import { createUserCredentials } from './test-help'
+import { createDianonCredentials } from './test-help-dianon'
 
 describe('Test dianon plugin', () => {
   let server: Hapi.Server
   let testUserCredentials: AuthCredentials
   let testAdminCredentials: AuthCredentials
+  let testDianonCredentials: DianonCredentials
 
   beforeAll(async () => {
     server = await createServer()
     testUserCredentials = await createUserCredentials(server.app.prisma, false)
     testAdminCredentials = await createUserCredentials(server.app.prisma, true)
+    testDianonCredentials = await createDianonCredentials(server.app.prisma)
   })
 
   afterAll(async () => {
@@ -37,6 +40,7 @@ describe('Test dianon plugin', () => {
     })
 
     expect(response.statusCode).toEqual(201)
+    console.log(response.payload)
     userId = JSON.parse(response.payload)?.id
     expect(typeof userId === 'number').toBeTruthy()
   })
@@ -102,7 +106,7 @@ describe('Test dianon plugin', () => {
     })
     expect(response.statusCode).toEqual(200)
     const users = JSON.parse(response.payload)
-
+    console.log(users)
     expect(Array.isArray(users)).toBeTruthy()
     expect(users[0]?.id).toBeTruthy()
   })
@@ -113,7 +117,7 @@ describe('Test dianon plugin', () => {
 
     const response = await server.inject({
       method: 'PUT',
-      url: `/dianons/${testAdminCredentials.userId}`,
+      url: `/dianons/${testDianonCredentials.userId}`,
       auth: {
         strategy: API_AUTH_STATEGY,
         credentials: testAdminCredentials,
@@ -123,22 +127,11 @@ describe('Test dianon plugin', () => {
         lastName: updatedLastName,
       },
     })
+    console.log(testAdminCredentials.userId)
     expect(response.statusCode).toEqual(200)
     const user = JSON.parse(response.payload)
     expect(user.firstName).toEqual(updatedFirstName)
     expect(user.lastName).toEqual(updatedLastName)
-  })
-
-  test('delete authenticated user', async () => {
-    const response = await server.inject({
-      method: 'DELETE',
-      url: `/dianons/${testAdminCredentials.userId}`,
-      auth: {
-        strategy: API_AUTH_STATEGY,
-        credentials: testAdminCredentials,
-      },
-    })
-    expect(response.statusCode).toEqual(204)
   })
 
 })

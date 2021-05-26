@@ -76,7 +76,6 @@ interface APITokenPayload {
   tokenId: number
 }
 
-// Function will be called on every request using the auth strategy
 const validateAPIToken = async (
   decoded: APITokenPayload,
   request: Hapi.Request,
@@ -84,8 +83,7 @@ const validateAPIToken = async (
 ) => {
   const { prisma } = request.server.app
   const { tokenId } = decoded
-  
-  // Validate the token payload adheres to the schema
+
   const { error } = apiTokenSchema.validate(decoded)
 
   if (error) {
@@ -104,17 +102,14 @@ const validateAPIToken = async (
       },
     })
 
-    // Check if token could be found in database and is valid
     if (!fetchedToken || !fetchedToken?.valid) {
       return { isValid: false, errorMessage: 'Invalid Token' }
     }
 
-    // Check token expiration
     if (fetchedToken.expiration < new Date()) {
       return { isValid: false, errorMessage: 'Token expired' }
     }
 
-    // The token is valid. Make the `userId`, `isAdmin`, and `teacherOf` to `credentials` which is available in route handlers via `request.auth.credentials`
     return {
       isValid: true,
       credentials: {
@@ -144,13 +139,13 @@ async function authenticateHandler(
   request: Hapi.Request,
   h: Hapi.ResponseToolkit,
 ) {
-  // 👇 get prisma from shared application state
+
   const { prisma } = request.server.app
-  // 👇 get the email and emailToken from the request payload
+
   const { email, emailToken } = request.payload as AuthenticateInput
 
   try {
-    // Get short lived email token
+
     const fetchedEmailToken = await prisma.token.findUnique({
       where: {
         emailToken: emailToken,
@@ -161,24 +156,20 @@ async function authenticateHandler(
     })
 
     if (!fetchedEmailToken?.valid) {
-      // If the token doesn't exist or is not valid, return 401 unauthorized
       return boom.unauthorized()
     }
 
     if (fetchedEmailToken.expiration < new Date()) {
-      // If the token has expired, return 401 unauthorized
       return boom.unauthorized('Token expired')
     }
 
-    // If token matches the user email passed in the payload, generate long lived API token
     if (fetchedEmailToken?.user?.email === email) {
       const tokenExpiration = add(new Date(), {
         hours: AUTHENTICATION_TOKEN_EXPIRATION_HOURS,
       })
-      // Persist token in DB so it's stateful
       const createdToken = await prisma.token.create({
         data: {
-          type: TokenType.API,
+          type_token: TokenType.API,
           expiration: tokenExpiration,
           user: {
             connect: {
@@ -188,7 +179,6 @@ async function authenticateHandler(
         },
       })
 
-      // Invalidate the email token after it's been used
       await prisma.token.update({
         where: {
           id: fetchedEmailToken.id,
@@ -208,7 +198,6 @@ async function authenticateHandler(
   }
 }
 
-// Generate a signed JWT token with the tokenId in the payload
 function generateAuthToken(tokenId: number): string {
   const jwtPayload = { tokenId }
 
@@ -225,23 +214,20 @@ interface LoginInput {
 }
 
 async function loginHandler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
-  // 👇 get prisma and the sendEmailToken from shared application state
   const { prisma, sendEmailToken } = request.server.app
-  // 👇 get the email from the request payload
+
   const { email } = request.payload as LoginInput
-  // 👇 generate an alphanumeric token
+
   const emailToken = generateEmailToken()
-  // 👇 create a date object for the email token expiration
+
   const tokenExpiration = add(new Date(), {
     minutes: EMAIL_TOKEN_EXPIRATION_MINUTES,
   })
-
   try {
-    // 👇 create a short lived token and update user or create if they don't exist
     const createdToken = await prisma.token.create({
       data: {
         emailToken,
-        type: TokenType.EMAIL,
+        type_token: TokenType.EMAIL,
         expiration: tokenExpiration,
         user: {
           connectOrCreate: {
@@ -256,7 +242,6 @@ async function loginHandler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
       },
     })
 
-    // 👇 send the email token
     await sendEmailToken(email, emailToken)
     return h.response().code(200)
   } catch (error) {
@@ -264,7 +249,6 @@ async function loginHandler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
   }
 }
 
-// Generate a random 8 digit number as the email token
 function generateEmailToken(): string {
   return Math.floor(10000000 + Math.random() * 90000000).toString()
 }

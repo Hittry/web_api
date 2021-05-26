@@ -3,7 +3,6 @@ import { add } from 'date-fns'
 
 const prisma = new PrismaClient()
 
-// A `main` function so that we can use async/await
 async function main() {
   const testUser = await prisma.user.upsert({
     create: {

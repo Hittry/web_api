@@ -1,18 +1,21 @@
 import { createServer } from '../src/server'
-import Hapi, { AuthCredentials } from '@hapi/hapi'
+import Hapi, { AuthCredentials, FeatCredentials, DianonCredentials } from '@hapi/hapi'
 import {describe, expect, test, beforeAll, afterAll} from '@jest/globals'
 import { API_AUTH_STATEGY } from '../src/plugins/auth'
 import { createUserCredentials } from './test-help'
+import { createFeatCredentials } from './test-help-feat'
 
 describe('Test features plugin', () => {
   let server: Hapi.Server
   let testUserCredentials: AuthCredentials
   let testAdminCredentials: AuthCredentials
+  let testFeatCredentials: FeatCredentials
 
   beforeAll(async () => {
     server = await createServer()
     testUserCredentials = await createUserCredentials(server.app.prisma, false)
     testAdminCredentials = await createUserCredentials(server.app.prisma, true)
+    testFeatCredentials = await createFeatCredentials(server.app.prisma)
   })
 
   afterAll(async () => {
@@ -22,9 +25,26 @@ describe('Test features plugin', () => {
   let userId: number
 
   test('create dianon features as admin', async () => {
+    const responseDianon = await server.inject({
+      method: 'POST',
+      url: '/dianons',
+      auth: {
+        strategy: API_AUTH_STATEGY,
+        credentials: testAdminCredentials,
+      },
+      payload: {
+        firstName: 'test-first-name',
+        lastName: 'test-last-name',
+        email: `test-${Date.now()}@prisma.io`
+      }
+    })
+    expect(responseDianon.statusCode).toEqual(201)
+
+    userId = JSON.parse(responseDianon.payload)?.id
+
     const response = await server.inject({
       method: 'POST',
-      url: `/dianons/${testAdminCredentials.userId}/features`,
+      url: `/dianons/${userId}/features`,
       auth: {
         strategy: API_AUTH_STATEGY,
         credentials: testAdminCredentials,
@@ -58,7 +78,7 @@ describe('Test features plugin', () => {
   test('create dianon features validation', async () => {
     const response = await server.inject({
       method: 'POST',
-      url: `/dianons/${testAdminCredentials.userId}/features`,
+      url: `/dianons/${testFeatCredentials.userId}/features`,
       auth: {
         strategy: API_AUTH_STATEGY,
         credentials: testAdminCredentials,
@@ -73,11 +93,11 @@ describe('Test features plugin', () => {
   })
 
   test('update dianon features ', async () => {
-    const tatoUpdate = 'test-first-name-UPDATED'
+    const tatoUpdate = 'test-tato-UPDATED'
 
     const response = await server.inject({
       method: 'PUT',
-      url: `/dianons/features/${testAdminCredentials.userId}`,
+      url: `/dianons/features/${testFeatCredentials.userId}`,
       auth: {
         strategy: API_AUTH_STATEGY,
         credentials: testAdminCredentials,
@@ -89,18 +109,6 @@ describe('Test features plugin', () => {
     expect(response.statusCode).toEqual(200)
     const user = JSON.parse(response.payload)
     expect(user.tato).toEqual(tatoUpdate)
-  })
-
-  test('delete dianon features', async () => {
-    const response = await server.inject({
-      method: 'DELETE',
-      url: `/dianons/features/${testAdminCredentials.userId}`,
-      auth: {
-        strategy: API_AUTH_STATEGY,
-        credentials: testAdminCredentials,
-      },
-    })
-    expect(response.statusCode).toEqual(204)
   })
 
 })

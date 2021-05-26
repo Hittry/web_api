@@ -4,7 +4,6 @@ import Joi from 'joi'
 import { API_AUTH_STATEGY } from './auth'
 import { isAdmin } from '../auth-help'
 
-// plugin to instantiate Prisma Client
 const usersPlugin = {
   name: 'app/users',
   dependencies: ['prisma'],
@@ -26,7 +25,6 @@ const usersPlugin = {
               validate: {
                   payload: createUserValidator,
                   failAction: (request, h, err) => {
-                    // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                     throw err
                   },
               }
@@ -50,7 +48,6 @@ const usersPlugin = {
                   userId: Joi.string().pattern(/^[0-9]+$/),
                 }),
                 failAction: (request, h, err) => {
-                    // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                     throw err
                   },
               },
@@ -74,7 +71,6 @@ const usersPlugin = {
                   userId: Joi.string().pattern(/^[0-9]+$/),
                 }),
                 failAction: (request, h, err) => {
-                  // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                   throw err
                 },
               },
@@ -99,7 +95,6 @@ const usersPlugin = {
                 }),
                 payload: updateUserValidator,
                 failAction: (request, h, err) => {
-                  // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                   throw err
                 },
               },
@@ -119,11 +114,11 @@ const userInputValidator = Joi.object({
         update: schema => schema.optional(),
       }),
     firstName: Joi.string().alter({
-      create: schema => schema.required(),
+      create: schema => schema.optional(),
       update: schema => schema.optional(),
     }),
     lastName: Joi.string().alter({
-      create: schema => schema.required(),
+      create: schema => schema.optional(),
       update: schema => schema.optional(),
     })
     })
@@ -134,7 +129,7 @@ interface UserInput {
         email: string
         firstName?: string
         lastName?: string
-};
+}
 
 async function getUserHandler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
     const { prisma } = request.server.app

@@ -3,8 +3,6 @@ import Joi from 'joi'
 import Boom from '@hapi/boom'
 import sendgrid from '@sendgrid/mail'
 
-// Module augmentation to add shared application state
-// https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33809#issuecomment-472103564
 declare module '@hapi/hapi' {
   interface ServerApplicationState {
     sendEmailToken(email: string, token: string): Promise<void>
@@ -14,6 +12,7 @@ declare module '@hapi/hapi' {
 const emailPlugin = {
   name: 'app/email',
   register: async function(server: Hapi.Server) {
+    console.log(process.env.SENDGRID_API_KEY)
     if (!process.env.SENDGRID_API_KEY) {
       console.log(
         `The SENDGRID_API_KEY env var must be set, otherwise the API won't be able to send emails.`,
@@ -30,13 +29,15 @@ const emailPlugin = {
 export default emailPlugin
 
 async function sendEmailToken(email: string, token: string) {
+  console.log(email)
+  console.log(token)
   const msg = {
     to: email,
-    from: 'EMAIL_ADDRESS_CONFIGURED_IN_SEND_GRID@email.com',
+    from: 'mr.sasha.shuv@gmail.com',
     subject: 'Login token for the modern backend API',
     text: `The login token for the API is: ${token}`,
   }
-
+  console.log(msg)
   await sendgrid.send(msg)
 }
 

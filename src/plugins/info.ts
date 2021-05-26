@@ -4,7 +4,13 @@ import Joi from 'joi'
 import { API_AUTH_STATEGY } from './auth'
 import { isAdmin } from '../auth-help'
 
-// plugin to instantiate Prisma Client
+
+declare module '@hapi/hapi' {
+    interface InfoCredentials {
+        userId: number
+    }
+}
+
 const infoPlugin = {
   name: 'app/info',
   dependencies: ['prisma'],
@@ -15,7 +21,7 @@ const infoPlugin = {
           path: '/dianons/{personId}/info',
           handler: registerInfoHandler,
           options : {
-              description: 'Post personal info abot dianon person, only if you admin',
+              description: 'Post personal info about dianon person, only if you admin',
               notes: 'Return json with personal info',
               tags: ['api', 'info'],
               pre: [isAdmin],
@@ -26,7 +32,6 @@ const infoPlugin = {
               validate: {
                   payload: createInfoValidator,
                   failAction: (request, h, err) => {
-                    // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                     throw err
                   },
               }
@@ -56,7 +61,6 @@ const infoPlugin = {
                     personId: Joi.string().pattern(/^[0-9]+$/),
                 }),
                 failAction: (request, h, err) => {
-                    // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                     throw err
                   },
               },
@@ -80,7 +84,6 @@ const infoPlugin = {
                     personId: Joi.string().pattern(/^[0-9]+$/),
                 }),
                 failAction: (request, h, err) => {
-                  // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                   throw err
                 },
               },
@@ -105,7 +108,6 @@ const infoPlugin = {
                 }),
                 payload: updateInfoValidator,
                 failAction: (request, h, err) => {
-                  // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                   throw err
                 },
               },

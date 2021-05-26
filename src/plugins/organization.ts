@@ -4,7 +4,13 @@ import Joi from 'joi'
 import { API_AUTH_STATEGY } from './auth'
 import { isAdmin } from '../auth-help'
 
-// plugin to instantiate Prisma Client
+
+declare module '@hapi/hapi' {
+    interface OrgCredentials {
+        userId: number
+    }
+}
+
 const orgPlugin = {
   name: 'app/org',
   dependencies: ['prisma'],
@@ -26,7 +32,6 @@ const orgPlugin = {
               validate: {
                   payload: createOrgValidator,
                   failAction: (request, h, err) => {
-                    // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                     throw err
                   },
               }
@@ -56,7 +61,6 @@ const orgPlugin = {
                     personId: Joi.string().pattern(/^[0-9]+$/),
                 }),
                 failAction: (request, h, err) => {
-                    // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                     throw err
                   },
               },
@@ -80,7 +84,6 @@ const orgPlugin = {
                     personId: Joi.string().pattern(/^[0-9]+$/),
                 }),
                 failAction: (request, h, err) => {
-                  // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                   throw err
                 },
               },
@@ -105,7 +108,6 @@ const orgPlugin = {
                 }),
                 payload: updateOrgValidator,
                 failAction: (request, h, err) => {
-                  // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                   throw err
                 },
               },

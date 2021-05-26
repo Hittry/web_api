@@ -4,7 +4,12 @@ import Joi from 'joi'
 import { API_AUTH_STATEGY } from './auth'
 import { isAdmin } from '../auth-help'
 
-// plugin to instantiate Prisma Client
+declare module '@hapi/hapi' {
+    interface DianonCredentials {
+        userId: number
+    }
+}
+
 const dianonPlugin = {
   name: 'app/dianons',
   dependencies: ['prisma'],
@@ -26,7 +31,6 @@ const dianonPlugin = {
               validate: {
                   payload: createDianonValidator,
                   failAction: (request, h, err) => {
-                    // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                     throw err
                   },
               }
@@ -55,7 +59,6 @@ const dianonPlugin = {
                     personId: Joi.string().pattern(/^[0-9]+$/),
                 }),
                 failAction: (request, h, err) => {
-                    // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                     throw err
                   },
               },
@@ -79,7 +82,6 @@ const dianonPlugin = {
                     personId: Joi.string().pattern(/^[0-9]+$/),
                 }),
                 failAction: (request, h, err) => {
-                  // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                   throw err
                 },
               },
@@ -104,7 +106,6 @@ const dianonPlugin = {
                 }),
                 payload: updateDianonValidator,
                 failAction: (request, h, err) => {
-                  // show validation errors to user https://github.com/hapijs/hapi/issues/3706
                   throw err
                 },
               },
@@ -152,7 +153,7 @@ interface DianonInput {
       vk?: string
       website?: string
     }
-};
+}
 
 async function getDianonHandler(
     request: Hapi.Request,

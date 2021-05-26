@@ -1,5 +1,5 @@
 import { createServer } from '../src/server'
-import Hapi, { AuthCredentials } from '@hapi/hapi'
+import Hapi, { AuthCredentials }  from '@hapi/hapi'
 import {describe, expect, test, beforeAll, afterAll} from '@jest/globals'
 import { API_AUTH_STATEGY } from '../src/plugins/auth'
 import { createUserCredentials } from './test-help'
@@ -37,6 +37,7 @@ describe('Test users plugin', () => {
     })
 
     expect(response.statusCode).toEqual(201)
+    console.log(response.payload)
     userId = JSON.parse(response.payload)?.id
     expect(typeof userId === 'number').toBeTruthy()
   })
@@ -109,20 +110,9 @@ describe('Test users plugin', () => {
     })
     expect(response.statusCode).toEqual(200)
     const user = JSON.parse(response.payload)
+    console.log(user)
     expect(user.firstName).toEqual(updatedFirstName)
     expect(user.lastName).toEqual(updatedLastName)
-  })
-
-  test('delete authenticated user', async () => {
-    const response = await server.inject({
-      method: 'DELETE',
-      url: `/users/${testAdminCredentials.userId}`,
-      auth: {
-        strategy: API_AUTH_STATEGY,
-        credentials: testAdminCredentials,
-      },
-    })
-    expect(response.statusCode).toEqual(204)
   })
 
 })
