@@ -1,4 +1,5 @@
 import { createServer } from '../src/server'
+// @ts-ignore
 import Hapi, { AuthCredentials, InfoCredentials } from '@hapi/hapi'
 import {describe, expect, test, beforeAll, afterAll} from '@jest/globals'
 import { API_AUTH_STATEGY } from '../src/plugins/auth'
@@ -74,9 +75,25 @@ describe('Test information about person plugin', () => {
   })
 
   test('create dianon personal info validation', async () => {
+    const responseDianon = await server.inject({
+      method: 'POST',
+      url: '/dianons',
+      auth: {
+        strategy: API_AUTH_STATEGY,
+        credentials: testAdminCredentials,
+      },
+      payload: {
+        firstName: 'test-info-name',
+        lastName: 'info-last-name',
+        email: `test-${Date.now()}@prisma.io`
+      }
+    })
+    expect(responseDianon.statusCode).toEqual(201)
+
+    userId = JSON.parse(responseDianon.payload)?.id
     const response = await server.inject({
       method: 'POST',
-      url: `/dianons/${testInfoCredentials.userId}/features`,
+      url: `/dianons/${userId}/features`,
       auth: {
         strategy: API_AUTH_STATEGY,
         credentials: testAdminCredentials,
@@ -92,10 +109,45 @@ describe('Test information about person plugin', () => {
 
   test('update dianon personal info', async () => {
     const telephoneUpdated = 'telephone-UPDATED'
+    const responseDianon = await server.inject({
+      method: 'POST',
+      url: '/dianons',
+      auth: {
+        strategy: API_AUTH_STATEGY,
+        credentials: testAdminCredentials,
+      },
+      payload: {
+        firstName: 'test-info-name',
+        lastName: 'info-last-name',
+        email: `test-${Date.now()}@prisma.io`
+      }
+    })
+
+    expect(responseDianon.statusCode).toEqual(201)
+    console.log(responseDianon)
+
+    userId = JSON.parse(responseDianon.payload)?.id
+    console.log(userId)
+
+    const responseInfo = await server.inject({
+      method: 'POST',
+      url: `/dianons/${userId}/info`,
+      auth: {
+        strategy: API_AUTH_STATEGY,
+        credentials: testAdminCredentials,
+      },
+      payload: {
+        telephone: '7878787887'
+      }
+    })
+    console.log(responseInfo)
+    expect(responseInfo.statusCode).toEqual(201)
+    userId = JSON.parse(responseInfo.payload)?.id
+    expect(typeof userId === 'number').toBeTruthy()
 
     const response = await server.inject({
       method: 'PUT',
-      url: `/dianons/info/${testInfoCredentials.userId}`,
+      url: `/dianons/info/${userId}`,
       auth: {
         strategy: API_AUTH_STATEGY,
         credentials: testAdminCredentials,

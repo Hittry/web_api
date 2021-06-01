@@ -1,6 +1,4 @@
 import Hapi from '@hapi/hapi'
-import Joi from 'joi'
-import Boom from '@hapi/boom'
 import sendgrid from '@sendgrid/mail'
 
 declare module '@hapi/hapi' {
@@ -12,7 +10,6 @@ declare module '@hapi/hapi' {
 const emailPlugin = {
   name: 'app/email',
   register: async function(server: Hapi.Server) {
-    console.log(process.env.SENDGRID_API_KEY)
     if (!process.env.SENDGRID_API_KEY) {
       console.log(
         `The SENDGRID_API_KEY env var must be set, otherwise the API won't be able to send emails.`,

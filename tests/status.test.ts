@@ -1,4 +1,5 @@
 import { createServer } from '../src/server'
+// @ts-ignore
 import Hapi from '@hapi/hapi'
 import {describe, expect, test, beforeAll, afterAll} from '@jest/globals'
 

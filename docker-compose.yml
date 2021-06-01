@@ -1,10 +1,5 @@
 version: '3.8'
 services:
-  # In Docker
-  # - TEST_POSTGRES_URI=postgres://prisma:prisma@postgres/
-  # Outside Docker
-  # - TEST_POSTGRES_URI=postgres://prisma:prisma@localhost:5432/
-
   postgres:
     image: postgres:10.3
     restart: always

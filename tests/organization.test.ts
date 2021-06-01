@@ -1,4 +1,5 @@
 import { createServer } from '../src/server'
+// @ts-ignore
 import Hapi, { AuthCredentials, OrgCredentials } from '@hapi/hapi'
 import {describe, expect, test, beforeAll, afterAll} from '@jest/globals'
 import { API_AUTH_STATEGY } from '../src/plugins/auth'
@@ -75,9 +76,25 @@ describe('Test information about person plugin', () => {
   })
 
   test('create dianon organization validation', async () => {
+    const responseDianon = await server.inject({
+      method: 'POST',
+      url: '/dianons',
+      auth: {
+        strategy: API_AUTH_STATEGY,
+        credentials: testAdminCredentials,
+      },
+      payload: {
+        firstName: 'test-info-name',
+        lastName: 'info-last-name',
+        email: `test-${Date.now()}@prisma.io`
+      }
+    })
+    expect(responseDianon.statusCode).toEqual(201)
+
+    userId = JSON.parse(responseDianon.payload)?.id
     const response = await server.inject({
       method: 'POST',
-      url: `/dianons/${testOrgCredentials.userId}/organization`,
+      url: `/dianons/${userId}/organization`,
       auth: {
         strategy: API_AUTH_STATEGY,
         credentials: testAdminCredentials,
@@ -93,10 +110,43 @@ describe('Test information about person plugin', () => {
 
   test('update dianon organization info', async () => {
     const nameUpdated = 'name-UPDATED'
+    const responseDianon = await server.inject({
+      method: 'POST',
+      url: '/dianons',
+      auth: {
+        strategy: API_AUTH_STATEGY,
+        credentials: testAdminCredentials,
+      },
+      payload: {
+        firstName: 'test-info-name',
+        lastName: 'info-last-name',
+        email: `test-${Date.now()}@prisma.io`
+      }
+    })
+    expect(responseDianon.statusCode).toEqual(201)
+
+    userId = JSON.parse(responseDianon.payload)?.id
+
+    const responseOrg = await server.inject({
+      method: 'POST',
+      url: `/dianons/${userId}/organization`,
+      auth: {
+        strategy: API_AUTH_STATEGY,
+        credentials: testAdminCredentials,
+      },
+      payload: {
+        name: 'MEPHI',
+        rank: 'gen dir'
+      }
+    })
+
+    expect(responseOrg.statusCode).toEqual(201)
+    userId = JSON.parse(responseOrg.payload)?.id
+    expect(typeof userId === 'number').toBeTruthy()
 
     const response = await server.inject({
       method: 'PUT',
-      url: `/dianons/organization/${testOrgCredentials.userId}`,
+      url: `/dianons/organization/${userId}`,
       auth: {
         strategy: API_AUTH_STATEGY,
         credentials: testAdminCredentials,

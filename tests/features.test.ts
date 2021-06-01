@@ -1,4 +1,5 @@
 import { createServer } from '../src/server'
+// @ts-ignore
 import Hapi, { AuthCredentials, FeatCredentials, DianonCredentials } from '@hapi/hapi'
 import {describe, expect, test, beforeAll, afterAll} from '@jest/globals'
 import { API_AUTH_STATEGY } from '../src/plugins/auth'
@@ -76,9 +77,25 @@ describe('Test features plugin', () => {
   })
 
   test('create dianon features validation', async () => {
+    const responseDianon = await server.inject({
+      method: 'POST',
+      url: '/dianons',
+      auth: {
+        strategy: API_AUTH_STATEGY,
+        credentials: testAdminCredentials,
+      },
+      payload: {
+        firstName: 'test-first-name',
+        lastName: 'test-last-name',
+        email: `test-${Date.now()}@prisma.io`
+      }
+    })
+    expect(responseDianon.statusCode).toEqual(201)
+
+    userId = JSON.parse(responseDianon.payload)?.id
     const response = await server.inject({
       method: 'POST',
-      url: `/dianons/${testFeatCredentials.userId}/features`,
+      url: `/dianons/${userId}/features`,
       auth: {
         strategy: API_AUTH_STATEGY,
         credentials: testAdminCredentials,
@@ -94,10 +111,44 @@ describe('Test features plugin', () => {
 
   test('update dianon features ', async () => {
     const tatoUpdate = 'test-tato-UPDATED'
+    const responseDianon = await server.inject({
+      method: 'POST',
+      url: '/dianons',
+      auth: {
+        strategy: API_AUTH_STATEGY,
+        credentials: testAdminCredentials,
+      },
+      payload: {
+        firstName: 'test-first-name',
+        lastName: 'test-last-name',
+        email: `test-${Date.now()}@prisma.io`
+      }
+    })
+    expect(responseDianon.statusCode).toEqual(201)
+
+    userId = JSON.parse(responseDianon.payload)?.id
+
+    const responseFeat = await server.inject({
+      method: 'POST',
+      url: `/dianons/${userId}/features`,
+      auth: {
+        strategy: API_AUTH_STATEGY,
+        credentials: testAdminCredentials,
+      },
+      payload: {
+        tato: 'dragon',
+        colour: 'blue',
+        sex: `man`
+      }
+    })
+
+    expect(responseFeat.statusCode).toEqual(201)
+    userId = JSON.parse(responseFeat.payload)?.id
+    expect(typeof userId === 'number').toBeTruthy()
 
     const response = await server.inject({
       method: 'PUT',
-      url: `/dianons/features/${testFeatCredentials.userId}`,
+      url: `/dianons/features/${userId}`,
       auth: {
         strategy: API_AUTH_STATEGY,
         credentials: testAdminCredentials,

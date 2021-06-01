@@ -1,4 +1,5 @@
 import { createServer } from '../src/server'
+// @ts-ignore
 import Hapi, { AuthCredentials }  from '@hapi/hapi'
 import {describe, expect, test, beforeAll, afterAll} from '@jest/globals'
 import { API_AUTH_STATEGY } from '../src/plugins/auth'
