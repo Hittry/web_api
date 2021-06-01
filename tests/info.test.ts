@@ -1,22 +1,19 @@
 import { createServer } from '../src/server'
 // @ts-ignore
-import Hapi, { AuthCredentials, InfoCredentials } from '@hapi/hapi'
+import Hapi, { AuthCredentials } from '@hapi/hapi'
 import {describe, expect, test, beforeAll, afterAll} from '@jest/globals'
 import { API_AUTH_STATEGY } from '../src/plugins/auth'
 import { createUserCredentials } from './test-help'
-import { createInfoCredentials } from './test-help-info'
 
 describe('Test information about person plugin', () => {
   let server: Hapi.Server
   let testUserCredentials: AuthCredentials
   let testAdminCredentials: AuthCredentials
-  let testInfoCredentials: InfoCredentials
 
   beforeAll(async () => {
     server = await createServer()
     testUserCredentials = await createUserCredentials(server.app.prisma, false)
     testAdminCredentials = await createUserCredentials(server.app.prisma, true)
-    testInfoCredentials = await createInfoCredentials(server.app.prisma)
   })
 
   afterAll(async () => {
